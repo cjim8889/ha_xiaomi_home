@@ -873,9 +873,13 @@ class MipsCloudClient(_MipsClient):
             f'device/{did}/up/properties_changed/'
             f'{"#" if siid is None or piid is None else f"{siid}/{piid}"}')
 
-        def on_prop_msg(topic: str, payload: str, ctx: Any) -> None:
+        def on_prop_msg(topic: str, payload: str | bytes, ctx: Any) -> None:
             try:
-                msg: dict = json.loads(payload)
+                if isinstance(payload, bytes):
+                    payload_str = payload.decode('utf-8')
+                else:
+                    payload_str = payload
+                msg: dict = json.loads(payload_str)
             except json.JSONDecodeError:
                 self.log_error(
                     f'on_prop_msg, invalid msg, {topic}, {payload}')
